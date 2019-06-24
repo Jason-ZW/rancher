@@ -7,8 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"reflect"
-	"sort"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -95,14 +93,14 @@ func (c *Client) ApplyDomain(hosts []string) (bool, string, error) {
 		fqdn, err := c.CreateDomain(hosts)
 		return true, fqdn, err
 	}
-
-	sort.Strings(d.Hosts)
-	sort.Strings(hosts)
-	if !reflect.DeepEqual(d.Hosts, hosts) {
-		logrus.Debugf("Fqdn %s has some changes, need to update", d.Fqdn)
-		fqdn, err := c.UpdateDomain(hosts)
-		return false, fqdn, err
-	}
+	//
+	//sort.Strings(d.Hosts)
+	//sort.Strings(hosts)
+	//if !reflect.DeepEqual(d.Hosts, hosts) {
+	//	logrus.Debugf("Fqdn %s has some changes, need to update", d.Fqdn)
+	//	fqdn, err := c.UpdateDomain(hosts)
+	//	return false, fqdn, err
+	//}
 	logrus.Debugf("Fqdn %s has no changes, no need to update", d.Fqdn)
 	fqdn, _, _ := c.getSecret()
 
@@ -129,6 +127,10 @@ func (c *Client) GetDomain() (d *model.Domain, err error) {
 	o, err := c.do(req)
 	if err != nil {
 		return d, errors.Wrap(err, "GetDomain: failed to execute a request")
+	}
+
+	if o.Data.Fqdn == "" {
+		return nil, nil
 	}
 
 	return &o.Data, nil
